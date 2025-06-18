@@ -1,0 +1,23 @@
+Submitted files:
+*.png - example visualization.
+*.vcf - files containing alelles in each population.
+*.bedGraph - files containing differences in alelle frequencies between nfe.vcf and others.
+rs_dbsnp_joined.tsv - file that contains variants for analysis.
+Makefile
+collect_freqs_bg.py - file that computes differences and writes to *bedGraph.
+collect_freqs_select.py - file that chooses only variants present in rs_dbsnp_joined.tsv fron stdin
+and writes them into files splitting by population.
+shrink_vcf.cpp - file that cuts all unnecessary information about variants to fit into memory.
+igv-webapp-session.json - session with files in IGV Web (*.png are screenshots of the session).
+How to run:
+Preprocessing raw data to reduce size of files:
+make
+Running Python scripts:
+zcat *.vcf.gz | python3 collect_freqs_select.py
+or
+zcat *.vcf.gz | pypy3 collect_freqs_select.py
+python3 collect_freqs_bg.py
+or
+pypy3 collect_freqs_bg.py
+Data was obtained from https://gnomad.broadinstitute.org/downloads. Preprocessed
+files with all the variants are still too big to sumbit.

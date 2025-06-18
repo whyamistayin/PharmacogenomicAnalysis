@@ -1,0 +1,186 @@
+Goal 1:
+Preprocessing data
+Description:
+The data used for analysis is populational data from gnomAD release #4 database (https://gnomad.broadinstitute.org/downloads).
+The files are too large even though they are zipped. They contain many information that I dont need. So finding a way to extract only
+things I need, and to fit the files into my computer's limited space in memory, was required.
+Solution:
+The information about alelle frequency is stored in 8th column of files named INFO. So I created a C++ script named "shrink_vcf.cpp"
+that reads INFO column by characters. It takes data to standard input and only prints to standard output attributes (and their values)
+that I need for analysis. I have made a rule in Makefile that automatically processes raw data when it is
+in directory and when calling "make" command in the terminal. Directory does not contain these preprocessed files, because even they are big.
+But at least I managed to keep them on my computer during the project.
+Goal 2:
+Visualizing populational data.
+Description:
+For future analysis the data must be vizualised as matrix, where rows are populations and the columns are nucleotide positions of
+polymosphisms.
+Solution:
+At the beginning I planned to visualize data in Jbrowse2 web. But there are no options to visualize gnomAD data as matrix with variants in Jbrowse2,
+because modern features of Jbrowse2 assume that .vcf file contains individual samples, but the gnomAD data is a big-data
+summary without individual samples. Also, dividing files by population would also make no progress, because there is no option
+to visualize polymosphisms the way that their color corresponds to alelle frequency. Only one plugin from deprecated Jbrowse1 might
+have been designed to visualize such data, but it uses deprecated dependencies during installation, which makes it very problematic
+if possible at all. I have found a way to create something similar to matrix in IGV. When data about different chromosomes is
+splitted into .vcf files by population, I can add the tracks so that each row (track) symbolizes population just like it should be. And
+the files are named corresponding to population names from gnomAD:
+AFR - African/African American, 
+AMR - Admixed American
+ASJ - Ashkenazi Jewish
+EAS - East Asian
+FIN - Finnish
+NFE - Non-Finnish European
+SAS - South Asian
+REMAINING - Other (population not assigned)
+But to make them all fit into the app window simultaniously, the dispay mode should be changed to "COLLAPSED".
+The collapsed mode shrinks all the variants to fit into one row, so some of them will not be seen that way, because layout
+rules choose the most frequent variant to show for each position; but to examine some gene more precisely, each track can be
+unwrapped by changing diplay mode to "EXTENDED" or, at leat, "SQUISHED". The .vcf tracks in IGV are colored by alelle frequency 
+by default, so that browser is the most ideal for visualizing polymosphism data, even though the options for visualizing
+populational data are still restrictingly limited when data has many variants on positions. There are some examples of visualization in
+the directory in .png format.
+Goal 3:
+Extracting variants that affect drug efficiency in patients.
+Solution:
+Directory contains rs_dbsnp_joined.tsv, which has variants in it that make drugs more/less 
+efficient in patients that have them. Only these variants need to be extracted from preprocessed data, and
+splitted by population. For that I used script collect_freqs_select.py, which handled it properly and quickly.
+Note that I compile my Python sctipts using pypy3 JIT compiler (alternative to cpython interpreter).
+That is what command looks like: "zcat *.vcf.gz | pypy3 collect_freqs_select.py". But command "make collect" can
+also be used, it looks similar and is written in Makefile.
+Goal 4:
+Comparison of non-finnish european population to others.
+Solution:
+For visualizing the differences as track I used format .bedGraph. It enables to visualize some numerical 
+values genome wide. Script called collect_freqs_bg.py compares variants found in non-finnish european population
+with the same ones from other populations by computing difference between alelle frequencies. Files nfe-vs-{}.bedGraph
+can be added as a track to IGV. This allows seeing where variants differ significantly.
+Analysis:
+Chromosome X:
+Loc "45,781,104-45,781,104" : allele T is associated with response to cisplatin, fluorouracil and mitoxantrone in
+people with Carcinoma, Hepatocellular as compared to allele C. Alelle C is found far more frequently in eastern/southern
+asian, american and african populations than in non-finnish european, which means that treating Carcinoma and Hepatocellular
+cancer by cisplatin, fluorouracil and mitoxantrone way more effective on people that have european roots. At the same time, 
+the same time this may not work for african, american, asian people.
+Loc "123,183,391-123,183,391" : genotype TT is associated with decreased response to Selective serotonin reuptake inhibitors or venlafaxine
+in people with Depressive Disorder, Major as compared to genotypes CC + CT. The frequency of alelle C in non-finnish european
+population is far smaller than african, american and asian populations. Majority of european people have TT genotype, which tells that
+using these antidepressants to treat depression in Europe is not very effective.
+Chromosome 22:
+Loc 41,682,662-41,682,662 : allele G is associated with increased concentrations of vincristine in children with Precursor Cell Lymphoblastic
+Leukemia-Lymphoma, Hodgkin Disease, Rhabdomyosarcoma, Medulloblastoma or Glioma as compared to allele A. These are types of cancer that are
+mostly diagnosed in children. Non-finnish european population has far higher frequency of that alelle than all populations except
+for eastern asian. So in Europe it is more efficient to check vincristine concentrations to prove the child is healthy/ill.
+Сhromosome 19:
+Loc 13,410,714-13,410,714 : allele G is not associated with resistance to antiepileptics in people with Epilepsy as compared to allele A.
+The frequency in european populations are much lower compared to others. Majority of people have genotype AA, so they are
+resistant to antiepileptics.
+Loc 11,333,455-11,333,455 : allele G is not associated with response to platinum in people with Lung Neoplasms as compared to allele C.
+European population has higher frequency of alelle G than every population except for jewish. The mutation occurs in oncogene and results in
+difficulities treating lung cancer.
+Chromosome 18:
+Loc 58,227,849-58,227,849 : allele C is not associated with response to hydrochlorothiazide in people with Hypertension as compared to allele G.
+European people have alelle G less frequently than asian, african and american. So treating hypertension with mentioned drug is more possible.
+Loc 58,792,367-58,792,367 : allele G is associated with increased response to cyclosporine in people with Psoriasis as compared to allele A.
+The alelle is more frequent in non-finnish europen than in african, asian and even finnish european.
+Loc 4,970,507-4,970,507 : allele C is not associated with response to Selective serotonin reuptake inhibitors in people with Depressive Disorder,
+Major as compared to allele A. The non-finnish europeans have this alelle more frequently than finnish, asian and african. Treating depression with
+these antidepressants is less effective.
+Chromosome 17:
+Loc 61,406,405-61,406,405 : allele C is associated with decreased response to atenolol in people with Hypertension as compared to allele T.
+Alelle C is less frequent in Europe than in Asia and Africa, on the other hand the T is very frequent, which implies that treatment with atenolol
+is very possible.
+Loc 63,488,670-63,488,670 : genotype GG is not associated with response to sertraline in people with Depressive Disorder. Alelle A is less frequent in
+Europe, so the alelle G is more frequent. Using that drug to treat depression may not work for majority of patients.
+Loc 46,024,197-46,024,197 : allele C is not associated with response to corticosteroids in people with Asthma as compared to allele T. Frequency of
+alelle C is second biggest after jewish among populations. So using corticosteroids has risks to not work. (There is also a nearby variant at
+Loc 46,025,238-46,025,238, which has the same effect and almost the same difference in frequencies).
+Chromosome 16:
+Loc 1,202,369-1,202,369 : allele T is associated with decreased clinical benefit to ethosuximide in children with Epilepsy as compared to allele C. 
+In Europe the T alelle is significantly less frequent than in Asia and America, the drug is more effective.
+Loc 1,220,162-1,220,162 : allele A is not associated with resistance to antiepileptics in people with Epilepsy as compared to allele G. The frequency of
+the alelle A is the lowest in non-finnish european population, so resistance to these drugs is the most common.
+Chromosome 15:
+Loc 45,253,280-45,253,280 : Allele T is not associated with clearance of tenofovir in people with HIV Infections as compared to allele C.
+The alelle T is the most frequent in non-finnish european population, which gives insight about higher risks of incorrect pharmacokinetics of tenofovir in patients.
+Loc 45,262,069-45,262,069 : Genotype AA is not associated with increased response to gemcitabine in people with Pancreatic Neoplasms as compared to genotypes 
+AC + CC. The frequency of alelle A is the highest in non-finnish european population and is far higher than in Asia and Africa. So treating pancreatic cancer with 
+gemcitabine is less effective in Europe.
+Loc 74,785,026-74,785,026 : allele C is associated with decreased response to hydrochlorothiazide in people with Hypertension as compared to allele A. 
+In non-finnish european population the frequency of the alelle T is the highest, and far higher than in Africa and Asia. So using this drug in Europe is the most efficient.
+Loc 74,751,897-74,751,897 : allele A is not associated with metabolism of escitalopram in people with Depressive Disorder, Major as compared to allele G.
+The same pattern - european populations have the alelle A much more frequently that asian and african. So the pharmacokinetics of mentioned drug works worse
+in european patients.
+Chromosome 14:
+Loc 103,699,416-103,699,416 : allele A is not associated with response to radiotherapy in people with Nasopharyngeal Neoplasms as compared to allele G.
+In non-finnish european population the frequency of the alelle A is much higher than in american, african and asian. So radiotherapy is not effective for treating
+more patients.
+Loc 90,397,013-90,397,013 : allele T is associated with increased response to cyclosporine in people with Psoriasis as compared to allele C.
+European people have the alelle T much frequently that african, american and asian. Then treating Psoriasis with this particular drug in Europe brings more results.
+Chromosome 13:
+Loc 20,988,809-20,988,809 : allele A is not associated with response to cetuximab in people with Colorectal Neoplasms as compared to allele G.
+The frequency of alelle T is almost the highest in non-finnish european population, up to 81% have it. So cetuximab is bad a cure for intestine cancer in
+the context of Europe.
+Chromosome 12:
+Loc 111,446,804-111,446,804 : allele T is not associated with response to hydrochlorothiazide in people with Hypertension as compared to allele C.
+Alelle C is less frequent in Europe in comparison to Asia, Africa and America. Nearly half of people have alelle T, so the drug might not work for many of them.
+Loc 111,634,620-111,634,620 : genotypes AA + AG is associated with increased response to hydrochlorothiazide in people with Hypertension as compared to genotype GG.
+Alelle G is less frequent in Europe in comparison to Asia, Africa, America. Again, hydrochlorothiazide works way worse for treating european patients.
+Chromosome 11:
+Loc 126,157,578-126,157,578 : allele A is associated with increased response to interferon beta-1a and interferon beta-1b in people with Multiple Sclerosis as compared to alelle G.
+In the european population alelle G is significantly less frequent than in african, asian and american. Then more patients will respond good to
+interferon beta-1a and interferon beta-1b.
+Loc 101,117,303-101,117,303 : genotypes CT + TT is associated with decreased steady-state concentration of etonogestrel in women as compared to genotype CC.
+Nearly 80% people in Europe have the alelle T, which is the highest value among populations. So using this contraceptive is quite risky.
+Chromosome 10:
+Loc 107,285,113-107,285,113 : genotype GG is associated with increased response to exenatide in people with Diabetes Mellitus, Type 2 as compared to genotypes AA + AG.
+In non-finnish european population the alelle G is the most abundant. Exenatide will be more effective on average.
+Loc 62,045,858-62,045,858 : allele C is not associated with concentrations of methotrexate in children with Precursor Cell Lymphoblastic Leukemia-Lymphoma as compared to 
+alelle T. Alelle C is the least frequent in non-fin. european, so checking for concentration of methotrexate to diagnose works the best.
+Chromosome 9:
+Loc 85,025,721-85,025,721 : genotype AA is associated with increased response to lithium in people with Bipolar Disorder. Alelle A is less frequent in
+Europe than in Africa, America and Eastern Asia, so treating with lithium may be less effective im comparison.
+Loc 100,301,363-100,301,363 : allele G is associated with increased response to duloxetine in people with Depressive Disorder, Major as compared to allele A. 
+In Europe alelle G is the least frequent, so mentioned drug works better on average. 
+Chromosome 7:
+Loc 99,647,457-99,647,457 : allele C is associated with dose of tacrolimus in people with Kidney Transplantation as compared to allele A.
+The frequency of alelle C is lower in Europe than in Africa, Asia and America. Thus, people experience immune reaction after transplantation rarer and
+consequently rarer need the drug to deal with it.
+Chromosome 6:
+Loc 154,117,494-154,117,494 : allele C is not associated with dose of opioids in people with Pain as compared to allele A.
+and
+Loc 154,117,494-154,117,494 :  allele G is not associated with response to ethanol as compared to allele A.
+These variants in OPM1 reduce sensitivity to opioids and alcohol. And they are the most frequent in Europe. This fits a larger pattern
+where Europeans may carry OPRM1 variants that modulate — rather than amplify — the opioid/alcohol reward system, consistent with historical
+alcohol exposure and possibly selection for tolerance or reduced addiction risk.
+Chromosome 5:
+Loc 132,660,151-132,660,151 : allele T is associated with decreased response to Hepatitis vaccines as compared to allele C.
+Alelle C is the most frequent in Europe — around 80% people have it. In my opinion, this might be caused by prevalent and early vaccination of population.
+Loc 132,660,808-132,660,808 : Genotypes AA + AC is associated with decreased response to ustekinumab in people with Psoriasis as compared to genotype CC.
+In non-finnish european population the alelle C, and consequently genotype CC, is the most common. Then in Europe ustekinumab is suitable for more patients.
+Chromosome 4:
+Loc 14,788,854-14,788,854 : allele G is associated with increased response to duloxetine in people with Depressive Disorder, Major as compared to allele A.
+Alelle G is the least frequent in Europe. Duloxetine affects patients less on average.
+Loc 61,914,104-61,914,104 : genotypes AG + GG are associated with increased response to methylphenidate in children Attention Deficit Disorder with Hyperactivity
+as compared to genotype AA. The frequency of alelle G (as well as genotypes AG + GG) in Europe if higher than in Africa, Asia and America.
+Methylphenidate is more effective in treatment then.
+Loc 61,828,999-61,828,999 : genotype AA is associated with decreased response to methylphenidate in children with Attention Deficit Disorder with Hyperactivity as
+compared to genotypes AT + TT. In european population alelle A is less common than in others. This contributes to previous conclusion.
+Chromosome 3:
+Loc 54,220,102-54,220,102 : genotype AA is associated with increased response to antipsychotics in people with Schizophrenia as compared to genotype GG.
+The frequency of alelle A among populations is the least significant in Europe. Treating patients with Schizophrenia for that reason might be harder.
+Loc 14,801,652-14,801,652 : allele A is associated with increased response to atenolol or metoprolol in people with Hypertension as compared to allele C.
+Alelle A is less frequent in Europe in comparison to America, Africa and Eastern Asia. 
+Chromosome 2:
+Loc 233,916,448-233,916,448 : allele C is not associated with response to botulinum toxin type a in women with Migraine NOS as compared to allele T.
+In Europe the frequency of alelle C is the lowest. Many women in Europe that take injections of botulinum toxin might experience migraines as side effect.
+Loc 60,908,994-60,908,994 :  allele T is not associated with decreased response to Tumor necrosis factor alpha (TNF-alpha) inhibitors in people with Arthritis, 
+Rheumatoid as compared to alelle G. The frequency of alelle T is more prominent in Europe than Africa, Asia and America. Then treating Rheumatoid might be
+more successfull on average.
+Chromosome 1:
+Loc 156,882,671-156,882,671 : genotypes AC + CC are associated with decreased response to aspirin or prasugrel as compared to genotype AA.
+The alelle C is the most prominent in Europe (with AF ~ 73%), and consequently genotypes AC+CC are too. Many people in Europe respond weaker to 
+aspirin and prasugrel.
+Loc 32,290,838-32,290,838 : genotype CC is associated with decreased response to corticosteroids in children with Asthma as compared to genotypes CT + TT.
+In non-finnish european the alelle C is less frequent than in finnish, african and eastern asian. Therefore corticosteroids are suitable for bigger percentage
+of patients.

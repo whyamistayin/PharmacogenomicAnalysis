@@ -1,0 +1,100 @@
+{
+	"version": "3.2.6",
+	"showSampleNames": false,
+	"reference": {
+		"id": "hg38",
+		"name": "Human (GRCh38/hg38)",
+		"twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+		"wholeGenomeView": true,
+		"cytobandURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/cytoBandIdeo.txt.gz",
+		"aliasURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/hg38/hg38_alias.tab",
+		"chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
+		"chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+		"hubs": [
+			"https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg38/hub.txt",
+			"https://hgdownload.soe.ucsc.edu/hubs/GCF/000/001/405/GCF_000001405.40/hub.txt"
+		]
+	},
+	"locus": "chrX:1-156,040,895",
+	"roi": [],
+	"tracks": [
+		{
+			"type": "sequence",
+			"order": 5,
+			"revealed": true
+		},
+		{
+			"filename": "nfe.vcf",
+			"name": "nfe.vcf",
+			"order": 6,
+			"format": "vcf",
+			"type": "variant",
+			"color": "rgb(0,0,150)",
+			"file": "nfe.vcf"
+		},
+		{
+			"filename": "nfe-vs-afr.bedGraph",
+			"name": "nfe vs afr",
+			"order": 7,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-afr.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-ami.bedGraph",
+			"name": "nfe vs ami",
+			"order": 8,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-ami.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-eas.bedGraph",
+			"name": "nfe vs eas",
+			"order": 9,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-eas.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-amr.bedGraph",
+			"name": "nfe vs amr",
+			"order": 10,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-amr.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-fin.bedGraph",
+			"name": "nfe vs fin",
+			"order": 10,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-fin.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-sas.bedGraph",
+			"name": "nfe vs sas",
+			"order": 11,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-sas.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-asj.bedGraph",
+			"name": "nfe vs asj",
+			"order": 12,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-asj.bedGraph"
+		},
+		{
+			"filename": "nfe-vs-rem.bedGraph",
+			"name": "nfe vs rem",
+			"order": 12,
+			"format": "bedgraph",
+			"type": "wig",
+			"file": "nfe-vs-rem.bedGraph"
+		}
+	]
+}
