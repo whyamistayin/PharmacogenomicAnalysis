@@ -1,3 +1,26 @@
+def parse(handle_read, handle_write):
+    global dict_p, nfe_memory
+    for line in handle_read.readlines():
+        if line.startswith("#"):
+            continue
+        line = line.strip()
+        if not line:
+            continue
+        fields = line.split('\t')
+        chrom, pos, _, ref, alts = fields[:5]
+        _, af = fields[7].split(';')[0].split('=')
+        af = float(af)
+        if (chrom, pos) in dict_p:
+            dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
+        else:
+            dict_p[(chrom, pos)] = af
+    for (chrom, pos), af in dict_p.items():
+        if (chrom, pos) not in nfe_memory:
+            continue
+        diff: float = nfe_memory[(chrom, pos)] - af
+        handle_write.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
+    dict_p.clear()
+
 if __name__ == "__main__":
     with open("afr.vcf", 'r') as afr, \
          open("amr.vcf", 'r') as amr, \
@@ -41,164 +64,12 @@ if __name__ == "__main__":
             else: 
                 nfe_memory[(chrom, pos)] = af
         dict_p: dict[tuple[str, str], float] = {}
-        for line in asj.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_asj.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in ami.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_ami.write("\t".join([chrom, pos,str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in fin.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_fin.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in rem.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_rem.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in sas.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_sas.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in eas.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_eas.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in amr.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_amr.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
-        for line in afr.readlines():
-            if line.startswith("#"):
-                continue
-            line = line.strip()
-            if not line:
-                continue
-            fields = line.split('\t')
-            chrom, pos, _, ref, alts = fields[:5]
-            _, af = fields[7].split(';')[0].split('=')
-            af = float(af)
-            if (chrom, pos) in dict_p:
-                dict_p[(chrom, pos)] = max(dict_p[(chrom, pos)], af)
-            else:
-                dict_p[(chrom, pos)] = af
-        for (chrom, pos), af in dict_p.items():
-            if (chrom, pos) not in nfe_memory:
-                continue
-            diff: float = nfe_memory[(chrom, pos)] - af
-            nfe_vs_afr.write("\t".join([chrom, pos, str(int(pos) + 1), f"{diff:.5}"]) + "\n")
-        dict_p.clear()
+        parse(asj, nfe_vs_asj)
+        parse(ami, nfe_vs_ami)
+        parse(fin, nfe_vs_fin)
+        parse(rem, nfe_vs_rem)
+        parse(sas, nfe_vs_sas)
+        parse(eas, nfe_vs_eas)
+        parse(amr, nfe_vs_amr)
+        parse(afr, nfe_vs_afr)
         nfe_memory.clear()

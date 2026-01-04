@@ -73,6 +73,10 @@ The goal was to quantify and visualize the difference in allele frequencies betw
 The script collect_freqs_bg.py computes absolute differences in allele frequencies between NFE and each other population, generating .bedGraph files: nfe-vs-{}.bedGraph.
 These files can be loaded into IGV to visualize population-specific allele frequency divergence across the genome.
 
+```bash
+make bedgraphs
+```
+
 ### Example findings
 
 #### Chromosome X
